@@ -449,6 +449,7 @@ class FDSet {
 
             if (primes.has_subset(fd.rhs)) {
                 output.push({fd: fd.clone(), '3nf': true, reason: 'RHS is prime'})
+                continue
             }
 
             output.push({fd: fd.clone(), '3nf': false, reason: 'LHS not key, not trivial, RHS not prime'})
