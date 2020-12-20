@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>fd closure tool</title>
+        <link href="index.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css" integrity="sha256-WLKGWSIJYerRN8tbNGtXWVYnUM5wMJTXD8eG4NtGcDM=" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css" integrity="sha384-qCEsSYDSH0x5I45nNW4oXemORUZnYFtPy/FqB/OjqxabTMW5HVaaH9USK4fN3goV" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container">
+            <br/>
+            <div class="block">
+                <div class="level">
+                    <div class="level-left">
+                        <h1 class="title">Functional Dependency Tool</h1>
+                    </div>
+                    <div class="level-right">
+                        <a class="is-link is-size-4" href="https://github.com/pkage/fdtool">@pkage/fdtool</a>
+                    </div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column">
+                    <h2 class="title is-size-4">Inputs</h2>
+                    <div class="block">
+                        <div class="field">
+                            <label class="label">FD Set</label>
+                            <div class="control">
+                                <textarea class="textarea" placeholder="AB->CD" id="input_fds"></textarea>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Attributes for Closure</label>
+                            <div class="control">
+                                <input class="input" type="text" placeholder="AB" id="input_attrs">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="control">
+                                <button class="button is-primary" id="compute">Compute</button>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="block" id="output_info">
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="block">
+                        <h2 class="title is-size-4">Latex Output</h2>
+                        <pre id="output_latex">% latex goes here</pre>
+                    </div>
+                    <div class="block">
+                        <h2 class="title is-size-4">Rendered Output</h2>
+                        <div id="output_html">
+                            <i>None so far.</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.js" integrity="sha384-YFVvRUwgqxkAVN9bmAVLsKilmOKfQLyUx0ZlmDNs0aBUTsvMLnRxE3Km0NrZa0i9" crossorigin="anonymous"></script>
+        <script src="entailments.js" type="text/javascript"></script>
+        <script src="index.js" type="text/javascript"></script>
+        <script src="index.test.js" type="text/javascript"></script>
+    </body>
+</html>
