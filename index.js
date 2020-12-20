@@ -28,19 +28,29 @@ class Controller {
         const fds = new FDSet(fds_text)
         const attrs = new AttrSet(attrs_text)
 
-        const [output_attrs, steps] = fds.closure(attrs)
+        const [output_attrs, closure_steps] = fds.closure(attrs)
+        const [min_cover, min_cover_steps] = fds.get_minimal_cover()
 
         this.output_latex.innerText = `% db
 ${fds.to_latex()}
 
 % closure under ${attrs.to_latex()}
-${steps.to_latex()}`
+${closure_steps.to_latex()}`
 
 
         this.output_html.innerHTML = `<b>Interpreted relations as:</b><br>
 <span data-katex>${fds.to_latex()}</span><br/>
 <b>Computed <span data-katex>C_\\Sigma(${attrs.to_latex()})</span> as:</b><br/>
-${steps.to_html()}<br/>
+${closure_steps.to_html()}<br/>
+
+<div class="block">
+    <h2 class="title is-size-4">Minimal cover</h2>
+    <details>
+        <summary>Click to show</summary>
+        ${min_cover_steps.to_html()}
+        <pre>${min_cover_steps.to_latex()}</pre>
+    </details>
+</div>
 `
         const keys = fds.get_keys().map(a => a.to_latex()).join(', ')
         const primes = fds.get_prime_attrs().to_latex()

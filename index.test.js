@@ -101,10 +101,12 @@ const test_FDSet = expect => {
     // removal by value
     expect(fds.remove(new FD('B->EA')).to_str() === `EF->BC\nA->D\nBD->C`, 'removal')
 
+    // replace by value
+    expect(fds.replace(new FD('B->EA'), new FD('B->A')).to_str() === 'EF->BC\nA->D\nB->A\nBD->C', 'replacement')
+
     // closure
     const [attrs, ] = fds.closure(new AttrSet('FE'))
     expect_equals(attrs, 'ABCDEF', 'closure')
-
     window.fds = fds
 }
 

@@ -238,11 +238,72 @@ class FDClosureSteps {
     }
 }
 
-class FDMinimizationSteps {
+class FDMinimalCoverSteps {
     constructor(std_form) {
         this.std = std_form.clone()
+        this.minimizations = []
+        this.after_minimization_step = []
+        this.redundants = []
+        this.final = null
     }
 
+    add_minimization(before, after) {
+        this.minimizations.push([before, after])
+    }
+
+    finish_minimizations(fdset) {
+        this.after_minimization_step = fdset.clone()
+    }
+
+    mark_redundant(fd) {
+        this.redundants.push(fd.clone())
+    }
+
+    finalize(fdset) {
+        this.final = fdset.clone()
+    }
+
+    to_html() {
+        let html = `<span>Standard form: </span><br/><span data-katex>${this.std.to_latex()}</span><br/>`
+        if (this.minimizations.length === 0) {
+            html += `<i>No minimizations.</i><br/>`
+        } else {
+            html += '<span>Minimizations: <br/><ol>'
+            html += this.minimizations.map(m => `<li data-katex>${m[0].to_latex()} \\Rightarrow ${m[1].to_latex()}</li>`).join('')
+            html += '</ol>'
+        }
+
+
+        if (this.redundants.length === 0) {
+            html += `<i>No redundancies.</i><br/>`
+        } else {
+            html += '<span>Redundancies: <br/><ol>'
+            html += this.redundants.map(r => `<li data-katex>${r.to_latex()}</li>`).join('')
+            html += '</ol>'
+        }
+        html += `<span>Final minimization:</span><br/><span data-katex>${this.final.to_latex('\\Sigma_\\text{min}')}</span>`
+
+        return html
+    }
+
+    to_latex() {
+        let out = `Standard form:\n\\(${this.std.to_latex()}\\)\\\\\n`
+        out += `Minimizations:\\\\\n\\begin{enumerate}\n`
+        if (this.minimizations.length === 0) {
+            out += `    \\item \\textit{No minimizations.}\n`
+        } else {
+            out += this.minimizations.map(m => `    \\item \\(${m[0].to_latex()} \\Rightarrow ${m[1].to_latex()}\\) \n`).join('')
+        }
+        out += '\\end{enumerate} \\\\\nRedundancies: \\\\\n\\begin{enumerate}\n'
+        if (this.redundants.length === 0) {
+            out += `    \\item \\textit{No redundant FDs.}\n`
+        } else {
+            out += this.redundants.map(r => `    \\item \\(${r.to_latex()}\\)\n`).join('')
+        }
+        out += '\\end{enumerate} \\\\\nMinimal cover for \\(\\Sigma\\):\\\\\n'
+        out += `\\(${this.final.to_latex('\\Sigma_\\text{min}')}`
+        return out
+    }
 }
 
 class FDSet {
@@ -303,6 +364,18 @@ class FDSet {
      */
     get_all_attrs() {
         return this.get_all_lhs().union(this.get_all_rhs())
+    }
+
+    /**
+     * Get a copy of this FD set with the specified FD replaced
+     * @param {FD} find FD to find
+     * @param {FD} replace FD to replace find with
+     * @return {FDSet} a new set of FDs identical to this one with "find" replaced with "replace"
+     */
+    replace(find, replace) {
+        const new_fds = this.clone()
+        new_fds.fds = new_fds.fds.map(f => f.equals(find) ? replace.clone() : f.clone())
+        return new_fds
     }
 
     /**
@@ -487,13 +560,77 @@ class FDSet {
 
     /**
      * Get mimimal cover
-     * @return {FDSet} minimal cover
+     * @return {Array} tuple of minimal cover, steps
      */
     get_minimal_cover() {
         // step 1 - get standard form
-        const std_form = this.get_standard_form()
+        let fdset = this.get_standard_form()
+        const steps = new FDMinimalCoverSteps(fdset)
 
+        const min_tried = []
         // step 2 - minimize 
+        while (true) {
+            // find an FD with LHS > 2 that we haven't tried before
+            let minimizable = fdset.fds
+                .filter(fd => fd.lhs.attrs.size > 1)
+                .filter(fd => !min_tried.some(f => f.equals(fd)))
+
+            // if there are no candidates, then continue
+            if (minimizable.length === 0) {
+                console.log('no more minimizations')
+                break
+            }
+
+            // otherwise, mark it as tried
+            let current = minimizable[0]
+            min_tried.push(current.clone())
+
+            // check if it is minimizable
+            let all_subs = current
+                .lhs
+                .powerset()
+                .filter(a => !a.equals(current.lhs))
+
+
+            console.log(all_subs)
+
+            for (let sub of all_subs) {
+                console.log(fdset, fdset.closure(sub))
+                if (fdset.closure(sub)[0].has_subset(current.rhs)) {
+                    let replace_with = current.clone()
+                    replace_with.lhs = sub
+                    console.log(`replacing ${current} with ${replace_with}`)
+                    fdset = fdset.replace(current, replace_with)
+                    steps.add_minimization(current, replace_with)
+                    break
+                }
+            }
+        }
+
+        steps.finish_minimizations(fdset)
+
+        // find redundancies
+        while (true) {
+            let redundancies = fdset.fds
+                .map(fd => [fdset.remove(fd).closure(fd.lhs)[0], fd.rhs, fd])
+                .filter(pair => pair[0].has_subset(pair[1]))
+                .map(pair => pair[2])
+
+            console.log('redundancies', redundancies)
+
+            if (redundancies.length === 0) {
+                break
+            }
+
+            let redundant = redundancies[0]
+
+            steps.mark_redundant(redundant)
+            fdset = fdset.remove(redundant)
+        }
+
+        steps.finalize(fdset)
+
+        return [fdset, steps]
     }
 
     /**
