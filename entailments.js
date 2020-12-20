@@ -238,6 +238,13 @@ class FDClosureSteps {
     }
 }
 
+class FDMinimizationSteps {
+    constructor(std_form) {
+        this.std = std_form.clone()
+    }
+
+}
+
 class FDSet {
     constructor(description) {
         this.fds = description
@@ -330,6 +337,10 @@ class FDSet {
             // for posterity
             stepno += 1
             steps.add_step(stepno, source, fd_candidate)
+
+            if (source.equals(this.get_all_attrs())) {
+                break
+            }
 
 
             // safety -- have we iterated too much?
@@ -458,8 +469,32 @@ class FDSet {
         return output
     }
     
+    /**
+     * Create a copy of the FDSet in standard form
+     * @return {FDSet} a new fdset in standard form
+     */
+    get_standard_form() {
+        const std = new FDSet('')
 
+        for (let fd of this.fds) {
+            for (let val of fd.rhs.attrs) {
+                std.fds.push(new FD(`${fd.lhs}->${val}`))
+            }
+        }
 
+        return std
+    }
+
+    /**
+     * Get mimimal cover
+     * @return {FDSet} minimal cover
+     */
+    get_minimal_cover() {
+        // step 1 - get standard form
+        const std_form = this.get_standard_form()
+
+        // step 2 - minimize 
+    }
 
     /**
      * Convert this to a string
