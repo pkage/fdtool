@@ -45,16 +45,34 @@ ${steps.to_html()}<br/>
         const keys = fds.get_keys().map(a => a.to_latex()).join(', ')
         const primes = fds.get_prime_attrs().to_latex()
         
+        const bcnf = fds.check_bcnf()
+            .map(o => `<li>
+                <span data-katex style="${o.bcnf ? 'color:green;' : 'color:red;'}">
+                    ${o.fd.to_latex()}
+                </span> <i>${o.reason}</i></li>`)
+            .join('')
+
+        const threenf = fds.check_3nf()
+            .map(o => `<li>
+                <span data-katex style="${o['3nf'] ? 'color:green;' : 'color:red;'}">
+                    ${o.fd.to_latex()}
+                </span> <i>${o.reason}</i></li>`)
+            .join('')
+
 
         this.output_info.innerHTML = `<div class="block">
     <h2 class="title is-size-4">Info</h2>
     <b>Keys: <span data-katex>\\{${keys}\\}</span></b><br/>
     <b>Primes: <span data-katex>\\{${primes}\\}</span></b><br/>
 </div>
-<!--div class="block">
+<div class="block">
     <h2 class="title is-size-4">BCNF</h2>
-    <span>tbd</span>
-</div-->
+    <ol>${bcnf}</ol>
+</div>
+<div class="block">
+    <h2 class="title is-size-4">3NF</h2>
+    <ol>${threenf}</ol>
+</div>
 `
 
         this.typeset()

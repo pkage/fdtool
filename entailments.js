@@ -245,6 +245,9 @@ class FDSet {
             .map(line => line.trim())
             .filter(line => line !== '')
             .map(line => new FD(line))
+
+        this.keys = undefined
+        this.primes = undefined
     }
 
     /**
@@ -344,6 +347,9 @@ class FDSet {
      * @return {Array} set of AttrSets
      */
     get_keys() {
+        if (this.keys) {
+            return this.keys
+        }
         const all_attrs = this.get_all_attrs()
 
 
@@ -368,6 +374,8 @@ class FDSet {
             }
         }
 
+        this.keys = keys
+
         return keys
     }
 
@@ -381,8 +389,76 @@ class FDSet {
     }
 
     /**
-     * Get BCNF
+     * Check BCNF compliance
+     * @return {Array} of objects describing each FD
      */
+    check_bcnf() {
+        const output = []
+        const keys = this.get_keys()
+
+        for (let fd of this.fds) {
+            if (fd.lhs.has_subset(fd.rhs)) {
+                output.push({fd: fd.clone(), bcnf: true, reason: 'trivial'})
+                continue
+            }
+
+            let is_lhs_key = false
+            for (let key of keys) {
+                if (fd.lhs.equals(key)) {
+                    is_lhs_key = true
+                }
+            }
+
+            if (is_lhs_key) {
+                output.push({fd: fd.clone(), bcnf: true, reason: 'LHS is key'})
+                continue
+            }
+
+            output.push({fd: fd.clone(), bcnf: false, reason: 'LHS not key, not trivial'})
+        }
+
+        return output
+    }
+
+    /**
+     * Check 3NF compliance
+     * @return {Array} of objects describing each FD
+     */
+    check_3nf() {
+        const output = []
+        const keys = this.get_keys()
+        const primes = this.get_prime_attrs()
+
+        for (let fd of this.fds) {
+            if (fd.lhs.has_subset(fd.rhs)) {
+                output.push({fd: fd.clone(), '3nf': true, reason: 'trivial'})
+                continue
+            }
+
+            let is_lhs_key = false
+            for (let key of keys) {
+                if (fd.lhs.equals(key)) {
+                    is_lhs_key = true
+                }
+            }
+
+            if (is_lhs_key) {
+                output.push({fd: fd.clone(), '3nf': true, reason: 'LHS is key'})
+                continue
+            }
+
+            if (primes.has_subset(fd.rhs)) {
+                output.push({fd: fd.clone(), '3nf': true, reason: 'RHS is prime'})
+            }
+
+            output.push({fd: fd.clone(), '3nf': false, reason: 'LHS not key, not trivial, RHS not prime'})
+        }
+
+        return output
+    }
+    
+
+
 
     /**
      * Convert this to a string
