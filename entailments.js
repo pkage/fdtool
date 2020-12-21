@@ -287,21 +287,21 @@ class FDMinimalCoverSteps {
     }
 
     to_latex() {
-        let out = `Standard form:\n\\(${this.std.to_latex()}\\)\\\\\n`
-        out += `Minimizations:\\\\\n\\begin{enumerate}\n`
+        let out = `Standard form:\n\n\\(${this.std.to_latex()}\\)\n\n`
+        out += `Minimizations:\n\n\\begin{enumerate}\n`
         if (this.minimizations.length === 0) {
             out += `    \\item \\textit{No minimizations.}\n`
         } else {
             out += this.minimizations.map(m => `    \\item \\(${m[0].to_latex()} \\Rightarrow ${m[1].to_latex()}\\) \n`).join('')
         }
-        out += '\\end{enumerate} \\\\\nRedundancies: \\\\\n\\begin{enumerate}\n'
+        out += '\\end{enumerate} \n\nRedundancies: \n\n\\begin{enumerate}\n'
         if (this.redundants.length === 0) {
             out += `    \\item \\textit{No redundant FDs.}\n`
         } else {
             out += this.redundants.map(r => `    \\item \\(${r.to_latex()}\\)\n`).join('')
         }
-        out += '\\end{enumerate} \\\\\nMinimal cover for \\(\\Sigma\\):\\\\\n'
-        out += `\\(${this.final.to_latex('\\Sigma_\\text{min}')}`
+        out += '\\end{enumerate} \n\nMinimal cover for \\(\\Sigma\\):\n\n'
+        out += `\\(${this.final.to_latex('\\Sigma_\\text{min}')}\\)`
         return out
     }
 }
@@ -663,7 +663,7 @@ class FDSet {
             const inner = this.fds.map(f => f.to_latex()).join('\\\\')
             return inner
         } else {
-            const inner = this.fds.map(f => '\\\\ \\qquad ' + f.to_latex()).join(',\n ')
+            const inner = this.fds.map(f => '\\\\ \\text{} \\qquad ' + f.to_latex()).join(',\n ')
             return `${name} = \\{\n ${inner}\\\\\\}`
         }
     }
